@@ -9,7 +9,9 @@ This loop is intentionally explicit (not the SDK's "automatic function
 calling") so the control flow -- and every tool call/result -- is visible
 and can be logged, capped, and used to collect files to send back.
 """
+import time
 import google.generativeai as genai
+from google.api_core.exceptions import ResourceExhausted
 
 import config
 from tool_schemas import FUNCTION_DECLARATIONS, call_tool
@@ -76,6 +78,16 @@ def _get_session(chat_id):
     return _chat_sessions[chat_id]
 
 
+def _send_with_retry(chat, content, max_retries=3):
+    for attempt in range(max_retries):
+        try:
+            return chat.send_message(content)
+        except ResourceExhausted:
+            wait = 15 * (attempt + 1)
+            time.sleep(wait)
+    return chat.send_message(content)
+
+
 def handle_message(chat_id, user_text: str):
     """
     Runs one full observe->reason->act->feed-back->continue turn.
@@ -86,7 +98,7 @@ def handle_message(chat_id, user_text: str):
     chat = _get_session(chat_id)
     files_to_send = []
 
-    response = chat.send_message(user_text)
+    response = _send_with_retry(chat, user_text)
 
     hops = 0
     while hops < MAX_TOOL_HOPS:
@@ -112,9 +124,7 @@ def handle_message(chat_id, user_text: str):
                 )
             )
 
-        response = chat.send_message(
-            genai.protos.Content(parts=tool_response_parts)
-        )
+        response = _send_with_retry(chat, genai.protos.Content(parts=tool_response_parts))
         hops += 1
 
     reply_text = response.text if response.parts else "(no response)"
