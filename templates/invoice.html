@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body { font-family: 'DejaVu Sans', Arial, sans-serif; font-size: 12px; color: #222; margin: 30px; }
+  .header { display: flex; justify-content: space-between; border-bottom: 2px solid #333; padding-bottom: 10px; }
+  .shop-name { font-size: 20px; font-weight: bold; }
+  .muted { color: #666; font-size: 11px; }
+  .meta { margin-top: 10px; display: flex; justify-content: space-between; }
+  table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+  th, td { border: 1px solid #ccc; padding: 6px 8px; text-align: right; font-size: 11px; }
+  th { background: #f2f2f2; }
+  td.name, th.name { text-align: left; }
+  .totals { margin-top: 12px; width: 100%; }
+  .totals td { border: none; padding: 3px 8px; }
+  .grand-total { font-size: 15px; font-weight: bold; border-top: 2px solid #333; }
+  .footer { margin-top: 30px; font-size: 10px; color: #888; text-align: center; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <div class="shop-name">{{ shop_name }}</div>
+      <div class="muted">{{ shop_address }}</div>
+      <div class="muted">GSTIN: {{ shop_gstin }}</div>
+    </div>
+    <div style="text-align:right;">
+      <div><strong>TAX INVOICE</strong></div>
+      <div class="muted">Invoice #: {{ bill_id }}</div>
+      <div class="muted">Date: {{ date }}</div>
+    </div>
+  </div>
+
+  <div class="meta">
+    <div>Customer: {{ customer or "Walk-in" }}</div>
+    <div>Payment: {{ payment_mode|upper }}{% if payment_ref %} ({{ payment_ref }}){% endif %}</div>
+  </div>
+
+  <table>
+    <tr>
+      <th class="name">Item</th>
+      <th>HSN</th>
+      <th>Qty</th>
+      <th>Rate (₹)</th>
+      <th>Taxable (₹)</th>
+      <th>GST %</th>
+      <th>CGST (₹)</th>
+      <th>SGST (₹)</th>
+      <th>Total (₹)</th>
+    </tr>
+    {% for item in items %}
+    <tr>
+      <td class="name">{{ item.product }}</td>
+      <td>{{ item.hsn_code or "-" }}</td>
+      <td>{{ item.qty }}</td>
+      <td>{{ "%.2f"|format(item.unit_price) }}</td>
+      <td>{{ "%.2f"|format(item.qty * item.unit_price) }}</td>
+      <td>{{ item.gst_rate }}%</td>
+      <td>{{ "%.2f"|format(item.cgst_amt) }}</td>
+      <td>{{ "%.2f"|format(item.sgst_amt) }}</td>
+      <td>{{ "%.2f"|format(item.line_total) }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <table class="totals">
+    <tr><td style="text-align:right; width:85%;">Subtotal (taxable value)</td>
+        <td style="text-align:right; width:15%;">₹{{ "%.2f"|format(subtotal) }}</td></tr>
+    <tr><td style="text-align:right;">CGST</td>
+        <td style="text-align:right;">₹{{ "%.2f"|format(cgst) }}</td></tr>
+    <tr><td style="text-align:right;">SGST</td>
+        <td style="text-align:right;">₹{{ "%.2f"|format(sgst) }}</td></tr>
+    <tr class="grand-total"><td style="text-align:right;">Grand Total</td>
+        <td style="text-align:right;">₹{{ "%.2f"|format(total) }}</td></tr>
+  </table>
+
+  <div class="footer">This is a computer-generated invoice. Thank you for shopping with us.</div>
+</body>
+</html>

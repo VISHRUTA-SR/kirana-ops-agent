@@ -1,0 +1,8 @@
+python-telegram-bot==21.4
+google-generativeai==0.8.3
+SQLAlchemy==2.0.34
+Jinja2==3.1.4
+weasyprint==62.3
+python-pptx==0.6.23
+nest_asyncio==1.6.0
+python-dotenv==1.0.1
