@@ -7,7 +7,7 @@ import os
 
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
-GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash")
 
 DATABASE_PATH = os.environ.get("DATABASE_PATH", "./store.db")
 INVOICE_DIR = os.environ.get("INVOICE_DIR", "./invoices")
